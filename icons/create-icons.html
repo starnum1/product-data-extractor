@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>生成图标</title>
+</head>
+<body>
+  <canvas id="canvas16" width="16" height="16"></canvas>
+  <canvas id="canvas48" width="48" height="48"></canvas>
+  <canvas id="canvas128" width="128" height="128"></canvas>
+  
+  <script>
+    // 生成16x16图标
+    const canvas16 = document.getElementById('canvas16');
+    const ctx16 = canvas16.getContext('2d');
+    ctx16.fillStyle = '#667eea';
+    ctx16.fillRect(0, 0, 16, 16);
+    ctx16.fillStyle = 'white';
+    ctx16.font = 'bold 12px Arial';
+    ctx16.textAlign = 'center';
+    ctx16.textBaseline = 'middle';
+    ctx16.fillText('📦', 8, 8);
+
+    // 生成48x48图标
+    const canvas48 = document.getElementById('canvas48');
+    const ctx48 = canvas48.getContext('2d');
+    ctx48.fillStyle = '#667eea';
+    ctx48.fillRect(0, 0, 48, 48);
+    ctx48.fillStyle = 'white';
+    ctx48.font = 'bold 32px Arial';
+    ctx48.textAlign = 'center';
+    ctx48.textBaseline = 'middle';
+    ctx48.fillText('📦', 24, 24);
+
+    // 生成128x128图标
+    const canvas128 = document.getElementById('canvas128');
+    const ctx128 = canvas128.getContext('2d');
+    ctx128.fillStyle = '#667eea';
+    ctx128.fillRect(0, 0, 128, 128);
+    ctx128.fillStyle = 'white';
+    ctx128.font = 'bold 80px Arial';
+    ctx128.textAlign = 'center';
+    ctx128.textBaseline = 'middle';
+    ctx128.fillText('📦', 64, 64);
+
+    // 下载图标
+    setTimeout(() => {
+      [16, 48, 128].forEach(size => {
+        const canvas = document.getElementById(`canvas${size}`);
+        const link = document.createElement('a');
+        link.download = `icon${size}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }, 100);
+  </script>
+</body>
+</html>

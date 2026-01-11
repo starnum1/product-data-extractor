@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>插件测试页面</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .data-row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .value {
+      color: #333;
+      font-weight: 600;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #ffc107;
+    }
+  </style>
+</head>
+<body>
+  <h1>📦 商品数据提取器 - 测试页面</h1>
+
+  <div class="highlight">
+    <strong>测试说明：</strong>
+    <ol>
+      <li>确保已安装插件</li>
+      <li>点击浏览器工具栏的插件图标</li>
+      <li>点击"提取数据"按钮</li>
+      <li>查看是否成功提取下方的尺寸和重量数据</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>商品信息卡片 - 示例1（中文）</h2>
+    <div class="data-row">
+      <span class="label">参与促销天数：</span>
+      <span class="value">28</span>
+    </div>
+    <div class="data-row">
+      <span class="label">参与促销的折扣：</span>
+      <span class="value">41.93%</span>
+    </div>
+    <div class="data-row">
+      <span class="label">商品卡浏览量：</span>
+      <span class="value">11966</span>
+    </div>
+    <div class="data-row">
+      <span class="label">商品卡加购率：</span>
+      <span class="value">8.14%</span>
+    </div>
+    <div class="data-row">
+      <span class="label">商品点击率：</span>
+      <span class="value">13.91%</span>
+    </div>
+    <div class="data-row">
+      <span class="label">发货模式：</span>
+      <span class="value">FBS</span>
+    </div>
+    <div class="data-row">
+      <span class="label">退货取消率：</span>
+      <span class="value">12.7%</span>
+    </div>
+    <div class="data-row">
+      <span>
+        <span data-v-6268c9bd="" style="color: rgb(102, 102, 102); min-width: 110px; display: inline-block;">长 宽 高： </span>
+        <span data-v-6268c9bd="" style="display: inline-block; vertical-align: top; max-width: calc(100% - 120px); word-break: break-all; font-weight: bold;">480 x 380 x 180mm</span>
+      </span>
+    </div>
+    <div class="data-row">
+      <span>
+        <span data-v-6268c9bd="" style="color: rgb(102, 102, 102); min-width: 110px; display: inline-block;">重 量： </span>
+        <span data-v-6268c9bd="" style="display: inline-block; vertical-align: top; max-width: calc(100% - 120px); word-break: break-all; font-weight: bold;">7650g</span>
+      </span>
+    </div>
+    <div class="data-row">
+      <span class="label">上架时间：</span>
+      <span class="value">2025-10-31(71天)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>商品信息卡片 - 示例2（不同格式）</h2>
+    <div class="data-row">
+      <span class="label">产品名称：</span>
+      <span class="value">猫爬架</span>
+    </div>
+    <div class="data-row">
+      <span class="label">尺寸：</span>
+      <span class="value">50x40x120cm</span>
+    </div>
+    <div class="data-row">
+      <span class="label">重量：</span>
+      <span class="value">5.5kg</span>
+    </div>
+    <div class="data-row">
+      <span class="label">材质：</span>
+      <span class="value">剑麻+绒布</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>商品信息卡片 - 示例3（俄语）</h2>
+    <div class="data-row">
+      <span class="label">Название：</span>
+      <span class="value">Домик для кошек</span>
+    </div>
+    <div class="data-row">
+      <span class="label">Размер：</span>
+      <span class="value">60 × 45 × 150 мм</span>
+    </div>
+    <div class="data-row">
+      <span class="label">Вес：</span>
+      <span class="value">8500 г</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>商品信息卡片 - 示例4（英语）</h2>
+    <div class="data-row">
+      <span class="label">Product Name：</span>
+      <span class="value">Cat Tree Tower</span>
+    </div>
+    <div class="data-row">
+      <span class="label">Dimensions：</span>
+      <span class="value">24 x 18 x 48 inches</span>
+    </div>
+    <div class="data-row">
+      <span class="label">Weight：</span>
+      <span class="value">15.5 lb</span>
+    </div>
+  </div>
+
+  <script>
+    console.log('测试页面已加载');
+    console.log('请打开插件进行测试');
+  </script>
+</body>
+</html>
