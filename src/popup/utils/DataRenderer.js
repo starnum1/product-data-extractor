@@ -5,6 +5,7 @@ export class DataRenderer {
 
     this.renderDimensions(data.dimensions, elements.dimensionsData);
     this.renderWeight(data.weight, elements.weightData);
+    this.renderCommission(data.commission, elements.commissionData);
   }
 
   renderDimensions(dimensions, container) {
@@ -50,6 +51,26 @@ export class DataRenderer {
     } else {
       container.innerHTML =
         '<div class="data-item"><span class="data-label">未找到重量数据</span></div>';
+    }
+  }
+
+  renderCommission(commission, container) {
+    if (commission && commission.commissions && commission.commissions.length > 0) {
+      const commissionsHtml = commission.commissions
+        .map(
+          (rate) => `
+        <div class="data-item">
+          <span class="data-label">佣金比例</span>
+          <span class="data-value">${rate}</span>
+        </div>
+      `
+        )
+        .join('');
+
+      container.innerHTML = commissionsHtml;
+    } else {
+      container.innerHTML =
+        '<div class="data-item"><span class="data-label">未找到佣金数据</span></div>';
     }
   }
 }

@@ -14,6 +14,7 @@ export class UIController {
       emptyState: document.getElementById('emptyState'),
       dimensionsData: document.getElementById('dimensionsData'),
       weightData: document.getElementById('weightData'),
+      commissionData: document.getElementById('commissionData'),
       messageDiv: document.getElementById('message'),
       copyAllBtn: document.getElementById('copyAllBtn'),
       clearBtn: document.getElementById('clearBtn'),
@@ -71,7 +72,12 @@ export class UIController {
     if (this.currentData.weight) {
       const { value, unit } = this.currentData.weight;
       text += `重量信息:\n`;
-      text += `重量: ${value} ${unit}\n`;
+      text += `重量: ${value} ${unit}\n\n`;
+    }
+
+    if (this.currentData.commission && this.currentData.commission.commissions) {
+      text += `佣金信息:\n`;
+      text += `佣金比例: ${this.currentData.commission.commissions.join(', ')}\n`;
     }
 
     navigator.clipboard
