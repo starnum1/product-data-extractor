@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品数据提取器</title>
+  <link rel="stylesheet" href="./styles/popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📦 商品数据提取器</h1>
+      <p>一键提取长宽高和重量数据</p>
+    </div>
+
+    <button class="btn-extract" id="extractBtn">
+      🚀 提取数据
+    </button>
+
+    <div id="emptyState" class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <p>点击上方按钮开始提取数据</p>
+    </div>
+
+    <div id="resultSection" class="result-section">
+      <div class="data-card">
+        <h3>📏 尺寸信息</h3>
+        <div id="dimensionsData"></div>
+      </div>
+
+      <div class="data-card">
+        <h3>⚖️ 重量信息</h3>
+        <div id="weightData"></div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn-secondary" id="copyAllBtn">📋 复制全部</button>
+        <button class="btn-secondary" id="clearBtn">🗑️ 清除</button>
+      </div>
+    </div>
+
+    <div id="message"></div>
+  </div>
+
+  <script type="module" src="./popup.js"></script>
+</body>
+</html>

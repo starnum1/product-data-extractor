@@ -1,0 +1,20 @@
+{
+  "name": "product-data-extractor",
+  "version": "1.0.0",
+  "description": "商品数据提取器浏览器插件",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.ts",
+    "format": "prettier --write \"src/**/*.{js,ts,css,html}\""
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "vite": "^5.0.0",
+    "vite-plugin-static-copy": "^1.0.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1"
+  }
+}
