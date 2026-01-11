@@ -5,6 +5,7 @@ import path from 'path';
 export default defineConfig({
   build: {
     outDir: 'dist',
+    emptyOutDir: true,
     rollupOptions: {
       input: {
         popup: path.resolve(__dirname, 'src/popup/popup.html'),
@@ -13,7 +14,12 @@ export default defineConfig({
       output: {
         entryFileNames: '[name].js',
         chunkFileNames: '[name].js',
-        assetFileNames: '[name].[ext]',
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === 'popup.html') {
+            return '[name][extname]';
+          }
+          return '[name][extname]';
+        },
       },
     },
   },
