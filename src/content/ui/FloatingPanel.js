@@ -1,6 +1,7 @@
 import panelHtml from './panel.html?raw';
 import panelCss from './panel.css?raw';
 import { ProfitCalculator } from '../calculators/ProfitCalculator.js';
+import { OzonAutoListing } from '../automation/OzonAutoListing.js';
 
 /**
  * 浮动面板 - 可拖动的数据提取面板
@@ -9,6 +10,7 @@ export class FloatingPanel {
   constructor(extractor) {
     this.extractor = extractor;
     this.profitCalculator = new ProfitCalculator();
+    this.autoListing = new OzonAutoListing();
     this.panel = null;
     this.isDragging = false;
     this.dragOffset = { x: 0, y: 0 };
@@ -382,6 +384,8 @@ export class FloatingPanel {
         <div class="pep-target-price-rub">${result.targetPriceRUB} ₽</div>
       </div>
       
+      <button class="pep-btn-auto-list">⚡ 一键上架</button>
+      
       ${shippingChangeHtml}
       
       <div class="pep-profit-info">
@@ -433,6 +437,46 @@ export class FloatingPanel {
         <span>${result.breakdown.targetProfitRate}</span>
       </div>
     `;
+
+    // 绑定一键上架按钮事件
+    const autoListBtn = container.querySelector('.pep-btn-auto-list');
+    if (autoListBtn) {
+      autoListBtn.addEventListener('click', () => this.handleAutoList());
+    }
+  }
+
+  /**
+   * 处理自动上架测试
+   */
+  async handleAutoList() {
+    const btn = this.panel.querySelector('.pep-btn-auto-list');
+    
+    btn.disabled = true;
+    btn.textContent = '⏳ 执行中...';
+
+    try {
+      // 获取计算好的售价（人民币）
+      const priceEl = this.panel.querySelector('.pep-target-price-value');
+      const price = priceEl ? parseFloat(priceEl.textContent) : null;
+      
+      if (!price) {
+        this.showMessage('请先计算目标售价', 'error');
+        return;
+      }
+
+      const result = await this.autoListing.executeListingFlow(price);
+      
+      if (result.success) {
+        this.showMessage('✓ ' + result.message, 'success');
+      } else {
+        this.showMessage('✗ ' + result.message, 'error');
+      }
+    } catch (error) {
+      this.showMessage('✗ 错误: ' + error.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '⚡ 一键上架';
+    }
   }
 
   showMessage(text, type) {

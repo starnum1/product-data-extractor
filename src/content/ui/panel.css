@@ -66,7 +66,53 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.pep-btn-row {
   margin-bottom: 15px;
+}
+
+.pep-btn-row .pep-btn-extract {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pep-btn-row .pep-btn-extract:hover {
+  opacity: 0.9;
+}
+
+.pep-btn-row .pep-btn-extract:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pep-btn-auto-list {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pep-btn-auto-list:hover {
+  opacity: 0.9;
+}
+
+.pep-btn-auto-list:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .pep-btn-extract:hover {
