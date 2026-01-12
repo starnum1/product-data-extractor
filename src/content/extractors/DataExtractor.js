@@ -1,6 +1,7 @@
 import { DimensionExtractor } from './DimensionExtractor.js';
 import { WeightExtractor } from './WeightExtractor.js';
 import { CommissionExtractor } from './CommissionExtractor.js';
+import { PriceExtractor } from './PriceExtractor.js';
 import { ExtractionStrategy } from './strategies/ExtractionStrategy.js';
 
 export class DataExtractor {
@@ -8,6 +9,7 @@ export class DataExtractor {
     this.dimensionExtractor = new DimensionExtractor();
     this.weightExtractor = new WeightExtractor();
     this.commissionExtractor = new CommissionExtractor();
+    this.priceExtractor = new PriceExtractor();
     this.strategy = new ExtractionStrategy();
   }
 
@@ -17,6 +19,7 @@ export class DataExtractor {
       dimensions: null,
       weight: null,
       commission: null,
+      price: null,
       allData: {},
       error: null,
       debug: [],
@@ -27,14 +30,15 @@ export class DataExtractor {
       result.dimensions = this.strategy.extractDimensions(this.dimensionExtractor);
       result.weight = this.strategy.extractWeight(this.weightExtractor);
       result.commission = this.commissionExtractor.extract();
+      result.price = this.priceExtractor.extract();
 
       // 提取其他数据
       result.allData = this.extractAdditionalData();
 
-      result.success = !!(result.dimensions || result.weight || result.commission);
+      result.success = !!(result.dimensions || result.weight || result.commission || result.price?.greenPrice || result.price?.grayPrice);
 
       if (!result.success) {
-        result.error = '未找到尺寸、重量或佣金数据，请确保数据卡片已加载';
+        result.error = '未找到尺寸、重量、佣金或价格数据，请确保数据卡片已加载';
       }
 
       this.logDebugInfo(result);
@@ -74,6 +78,7 @@ export class DataExtractor {
     console.log('尺寸:', result.dimensions);
     console.log('重量:', result.weight);
     console.log('佣金:', result.commission);
+    console.log('价格:', result.price);
     console.log('其他数据:', result.allData);
   }
 }
