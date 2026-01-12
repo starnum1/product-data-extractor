@@ -6,6 +6,9 @@ export class DataRenderer {
     this.renderDimensions(data.dimensions, elements.dimensionsData);
     this.renderWeight(data.weight, elements.weightData);
     this.renderCommission(data.commission, elements.commissionData);
+    this.renderPrice(data.price, elements.priceData);
+    this.renderExchangeRate(data.price?.exchangeRate, elements.exchangeRateData);
+    this.renderShipping(data.shipping, elements.shippingData);
   }
 
   renderDimensions(dimensions, container) {
@@ -71,6 +74,86 @@ export class DataRenderer {
     } else {
       container.innerHTML =
         '<div class="data-item"><span class="data-label">未找到佣金数据</span></div>';
+    }
+  }
+
+  renderPrice(price, container) {
+    if (!container) return;
+    
+    if (price) {
+      container.innerHTML = `
+        <div class="data-item">
+          <span class="data-label">绿标价格 (CNY)</span>
+          <span class="data-value price-green">${price.greenPrice || '-'}</span>
+        </div>
+        <div class="data-item">
+          <span class="data-label">灰标价格 (CNY)</span>
+          <span class="data-value price-gray">${price.grayPrice || '-'}</span>
+        </div>
+        <div class="data-item">
+          <span class="data-label">绿标价格 (RUB)</span>
+          <span class="data-value">${price.greenPriceRUB || '-'}</span>
+        </div>
+        <div class="data-item">
+          <span class="data-label">灰标价格 (RUB)</span>
+          <span class="data-value">${price.grayPriceRUB || '-'}</span>
+        </div>
+      `;
+    } else {
+      container.innerHTML =
+        '<div class="data-item"><span class="data-label">未找到价格数据</span></div>';
+    }
+  }
+
+  renderExchangeRate(rate, container) {
+    if (!container) return;
+    
+    if (rate) {
+      container.innerHTML = `
+        <div class="data-item">
+          <span class="data-label">当前汇率</span>
+          <span class="data-value">1 CNY = ${rate.toFixed(4)} RUB</span>
+        </div>
+      `;
+    } else {
+      container.innerHTML =
+        '<div class="data-item"><span class="data-label">未获取汇率</span></div>';
+    }
+  }
+
+  renderShipping(shipping, container) {
+    if (!container) return;
+    
+    if (shipping && shipping.success) {
+      const { channel, shippingFee, details } = shipping;
+      container.innerHTML = `
+        <div class="data-item shipping-success">
+          <span class="data-label">运费</span>
+          <span class="data-value shipping-fee">${shippingFee} 元</span>
+        </div>
+        <div class="data-item">
+          <span class="data-label">渠道</span>
+          <span class="data-value">${channel.channel_name}</span>
+        </div>
+        <div class="data-item">
+          <span class="data-label">时效</span>
+          <span class="data-value">${channel.delivery_days}</span>
+        </div>
+        <div class="data-item">
+          <span class="data-label">计算公式</span>
+          <span class="data-value">${details.formula}</span>
+        </div>
+      `;
+    } else if (shipping && shipping.error) {
+      container.innerHTML = `
+        <div class="data-item shipping-error">
+          <span class="data-label">计算失败</span>
+          <span class="data-value">${shipping.error}</span>
+        </div>
+      `;
+    } else {
+      container.innerHTML =
+        '<div class="data-item"><span class="data-label">无法计算运费</span></div>';
     }
   }
 }

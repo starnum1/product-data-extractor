@@ -31,11 +31,35 @@
       <div class="data-card">
         <h3>⚖️ 重量信息</h3>
         <div id="weightData"></div>
+        <div class="input-group">
+          <label for="customWeight">自定义重量 (g)</label>
+          <input type="number" id="customWeight" placeholder="留空使用提取值">
+        </div>
       </div>
 
       <div class="data-card">
         <h3>💰 佣金信息</h3>
         <div id="commissionData"></div>
+      </div>
+
+      <div class="data-card">
+        <h3>💵 价格信息</h3>
+        <div id="priceData"></div>
+      </div>
+
+      <div class="data-card">
+        <h3>💱 汇率设置</h3>
+        <div id="exchangeRateData"></div>
+        <div class="input-group">
+          <label for="customRate">自定义汇率 (1 CNY = ? RUB)</label>
+          <input type="number" id="customRate" step="0.01" placeholder="留空使用API汇率">
+        </div>
+      </div>
+
+      <div class="data-card">
+        <h3>🚚 运费计算</h3>
+        <div id="shippingData"></div>
+        <button class="btn-recalculate" id="recalculateBtn">🔄 重新计算运费</button>
       </div>
 
       <div class="btn-group">

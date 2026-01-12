@@ -15,9 +15,15 @@ export class UIController {
       dimensionsData: document.getElementById('dimensionsData'),
       weightData: document.getElementById('weightData'),
       commissionData: document.getElementById('commissionData'),
+      priceData: document.getElementById('priceData'),
+      exchangeRateData: document.getElementById('exchangeRateData'),
+      shippingData: document.getElementById('shippingData'),
       messageDiv: document.getElementById('message'),
       copyAllBtn: document.getElementById('copyAllBtn'),
       clearBtn: document.getElementById('clearBtn'),
+      customWeight: document.getElementById('customWeight'),
+      customRate: document.getElementById('customRate'),
+      recalculateBtn: document.getElementById('recalculateBtn'),
     };
   }
 
@@ -29,6 +35,7 @@ export class UIController {
     this.elements.extractBtn.addEventListener('click', () => this.handleExtract());
     this.elements.copyAllBtn.addEventListener('click', () => this.handleCopyAll());
     this.elements.clearBtn.addEventListener('click', () => this.handleClear());
+    this.elements.recalculateBtn.addEventListener('click', () => this.handleRecalculate());
   }
 
   async handleExtract() {
@@ -41,6 +48,15 @@ export class UIController {
       if (response && response.success) {
         this.currentData = response;
         this.dataRenderer.render(response, this.elements);
+        
+        // 设置默认值到输入框
+        if (response.weight?.value) {
+          this.elements.customWeight.placeholder = `默认: ${response.weight.value} ${response.weight.unit}`;
+        }
+        if (response.price?.exchangeRate) {
+          this.elements.customRate.placeholder = `默认: ${response.price.exchangeRate.toFixed(4)}`;
+        }
+        
         this.messageHandler.showSuccess('✓ 数据提取成功！', this.elements.messageDiv);
       } else {
         this.messageHandler.showError(
@@ -52,6 +68,40 @@ export class UIController {
       this.messageHandler.showError('提取失败: ' + error.message, this.elements.messageDiv);
     } finally {
       this.setExtractingState(false);
+    }
+  }
+
+  async handleRecalculate() {
+    if (!this.currentData) {
+      this.messageHandler.showError('请先提取数据', this.elements.messageDiv);
+      return;
+    }
+
+    // 获取用户输入的自定义值
+    const customWeight = this.elements.customWeight.value;
+    const customRate = this.elements.customRate.value;
+
+    try {
+      const response = await this.dataService.recalculateShipping({
+        customWeight: customWeight ? parseFloat(customWeight) : null,
+        customRate: customRate ? parseFloat(customRate) : null,
+      });
+
+      if (response && response.shipping) {
+        this.currentData.shipping = response.shipping;
+        this.dataRenderer.renderShipping(response.shipping, this.elements.shippingData);
+        
+        // 如果使用了自定义汇率，更新价格显示
+        if (response.price) {
+          this.currentData.price = response.price;
+          this.dataRenderer.renderPrice(response.price, this.elements.priceData);
+          this.dataRenderer.renderExchangeRate(response.price.exchangeRate, this.elements.exchangeRateData);
+        }
+        
+        this.messageHandler.showSuccess('✓ 运费重新计算完成！', this.elements.messageDiv);
+      }
+    } catch (error) {
+      this.messageHandler.showError('计算失败: ' + error.message, this.elements.messageDiv);
     }
   }
 
