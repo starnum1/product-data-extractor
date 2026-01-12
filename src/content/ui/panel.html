@@ -53,11 +53,29 @@
       <button class="pep-btn-recalculate">🔄 重新计算运费</button>
     </div>
 
+    <div class="pep-section pep-profit-section">
+      <h4>💰 利润计算</h4>
+      <div class="pep-input-group">
+        <label>采购成本 (元) *</label>
+        <input type="number" class="pep-purchase-cost" placeholder="请输入采购成本" step="0.01" />
+      </div>
+      <div class="pep-input-group">
+        <label>贴单费 (元)</label>
+        <input type="number" class="pep-label-fee" placeholder="默认: 3" value="3" step="0.1" />
+      </div>
+      <div class="pep-input-group">
+        <label>杂费比例 (%)</label>
+        <input type="number" class="pep-misc-rate" placeholder="默认: 3.9" value="3.9" step="0.1" />
+      </div>
+      <button class="pep-btn-calc-profit">📊 计算目标售价</button>
+      <div class="pep-profit-result" style="display: none"></div>
+    </div>
+
     <div class="pep-btn-group">
       <button class="pep-btn-copy">📋 复制全部</button>
       <button class="pep-btn-clear">🗑️ 清除</button>
     </div>
   </div>
-  
+
   <div class="pep-message"></div>
 </div>

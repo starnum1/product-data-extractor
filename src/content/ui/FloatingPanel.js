@@ -1,5 +1,6 @@
 import panelHtml from './panel.html?raw';
 import panelCss from './panel.css?raw';
+import { ProfitCalculator } from '../calculators/ProfitCalculator.js';
 
 /**
  * 浮动面板 - 可拖动的数据提取面板
@@ -7,6 +8,7 @@ import panelCss from './panel.css?raw';
 export class FloatingPanel {
   constructor(extractor) {
     this.extractor = extractor;
+    this.profitCalculator = new ProfitCalculator();
     this.panel = null;
     this.isDragging = false;
     this.dragOffset = { x: 0, y: 0 };
@@ -51,6 +53,7 @@ export class FloatingPanel {
     const recalculateBtn = this.panel.querySelector('.pep-btn-recalculate');
     const copyBtn = this.panel.querySelector('.pep-btn-copy');
     const clearBtn = this.panel.querySelector('.pep-btn-clear');
+    const calcProfitBtn = this.panel.querySelector('.pep-btn-calc-profit');
 
     // 拖动
     header.addEventListener('mousedown', (e) => this.startDrag(e));
@@ -64,6 +67,7 @@ export class FloatingPanel {
     recalculateBtn.addEventListener('click', () => this.handleRecalculate());
     copyBtn.addEventListener('click', () => this.handleCopy());
     clearBtn.addEventListener('click', () => this.handleClear());
+    calcProfitBtn.addEventListener('click', () => this.handleCalcProfit());
   }
 
   startDrag(e) {
@@ -268,7 +272,115 @@ export class FloatingPanel {
     this.panel.querySelector('.pep-empty-state').style.display = 'block';
     this.panel.querySelector('.pep-custom-weight').value = '';
     this.panel.querySelector('.pep-custom-rate').value = '';
+    this.panel.querySelector('.pep-purchase-cost').value = '';
+    this.panel.querySelector('.pep-profit-result').style.display = 'none';
     this.showMessage('', '');
+  }
+
+  handleCalcProfit() {
+    if (!this.currentData) {
+      this.showMessage('请先提取数据', 'error');
+      return;
+    }
+
+    const purchaseCost = parseFloat(this.panel.querySelector('.pep-purchase-cost').value);
+    const labelFee = parseFloat(this.panel.querySelector('.pep-label-fee').value) || 3;
+    const miscRate = (parseFloat(this.panel.querySelector('.pep-misc-rate').value) || 3.9) / 100;
+
+    // 获取运费
+    const shippingFee = this.currentData.shipping?.success
+      ? parseFloat(this.currentData.shipping.shippingFee)
+      : null;
+
+    // 获取佣金
+    const commissions = this.currentData.commission?.commissions;
+
+    // 获取汇率
+    const exchangeRate = this.currentData.price?.exchangeRate;
+
+    const result = this.profitCalculator.calculate({
+      purchaseCost,
+      shippingFee,
+      commissions,
+      exchangeRate,
+      labelFee,
+      miscRate,
+    });
+
+    this.renderProfitResult(result);
+  }
+
+  renderProfitResult(result) {
+    const container = this.panel.querySelector('.pep-profit-result');
+    
+    if (!result.success) {
+      container.style.display = 'block';
+      container.innerHTML = `
+        <div class="pep-data-item pep-shipping-error">
+          <span>计算失败</span>
+          <span>${result.error}</span>
+        </div>
+      `;
+      return;
+    }
+
+    container.style.display = 'block';
+    container.innerHTML = `
+      <div class="pep-target-price">
+        <div class="pep-target-price-label">建议售价</div>
+        <div class="pep-target-price-value">${result.targetPriceCNY} ¥</div>
+        <div class="pep-target-price-rub">${result.targetPriceRUB} ₽</div>
+      </div>
+      
+      <div class="pep-profit-info">
+        <div class="pep-profit-info-item">
+          <div class="pep-profit-info-label">利润</div>
+          <div class="pep-profit-info-value profit">${result.profit} ¥</div>
+        </div>
+        <div class="pep-profit-info-item">
+          <div class="pep-profit-info-label">利润率</div>
+          <div class="pep-profit-info-value profit">${result.profitRate}</div>
+        </div>
+      </div>
+
+      <div class="pep-data-item">
+        <span>佣金挡位</span>
+        <span>第${result.commissionTier}挡 (${result.commissionRate})</span>
+      </div>
+
+      <div class="pep-breakdown">
+        <div class="pep-breakdown-title">费用明细</div>
+        <div class="pep-breakdown-item">
+          <span>采购成本</span>
+          <span>${result.breakdown.purchaseCost} ¥</span>
+        </div>
+        <div class="pep-breakdown-item">
+          <span>国际运费</span>
+          <span>${result.breakdown.shippingFee} ¥</span>
+        </div>
+        <div class="pep-breakdown-item">
+          <span>贴单费</span>
+          <span>${result.breakdown.labelFee} ¥</span>
+        </div>
+        <div class="pep-breakdown-item">
+          <span>平台佣金</span>
+          <span>${result.breakdown.commission} ¥</span>
+        </div>
+        <div class="pep-breakdown-item">
+          <span>杂费 (3.9%)</span>
+          <span>${result.breakdown.miscFee} ¥</span>
+        </div>
+        <div class="pep-breakdown-item total">
+          <span>总成本</span>
+          <span>${result.breakdown.totalCost} ¥</span>
+        </div>
+      </div>
+      
+      <div class="pep-data-item" style="margin-top: 8px; font-size: 11px; color: #888;">
+        <span>目标利润率</span>
+        <span>${result.breakdown.targetProfitRate}</span>
+      </div>
+    `;
   }
 
   showMessage(text, type) {
