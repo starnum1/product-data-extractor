@@ -1,0 +1,63 @@
+<div class="pep-header">
+  <span class="pep-title">📦 商品数据提取器</span>
+  <div class="pep-header-btns">
+    <button class="pep-btn-minimize" title="最小化">−</button>
+    <button class="pep-btn-close" title="关闭">×</button>
+  </div>
+</div>
+<div class="pep-body">
+  <button class="pep-btn-extract">🚀 提取数据</button>
+
+  <div class="pep-section pep-empty-state">
+    <div class="pep-empty-icon">📋</div>
+    <p>点击上方按钮开始提取数据</p>
+  </div>
+
+  <div class="pep-results" style="display: none">
+    <div class="pep-section">
+      <h4>📏 尺寸信息</h4>
+      <div class="pep-dimensions-data"></div>
+    </div>
+
+    <div class="pep-section">
+      <h4>⚖️ 重量信息</h4>
+      <div class="pep-weight-data"></div>
+      <div class="pep-input-group">
+        <label>自定义重量 (g)</label>
+        <input type="number" class="pep-custom-weight" placeholder="留空使用提取值" />
+      </div>
+    </div>
+
+    <div class="pep-section">
+      <h4>💰 佣金信息</h4>
+      <div class="pep-commission-data"></div>
+    </div>
+
+    <div class="pep-section">
+      <h4>💵 价格信息</h4>
+      <div class="pep-price-data"></div>
+    </div>
+
+    <div class="pep-section">
+      <h4>💱 汇率设置</h4>
+      <div class="pep-rate-data"></div>
+      <div class="pep-input-group">
+        <label>自定义汇率 (1 CNY = ? RUB)</label>
+        <input type="number" class="pep-custom-rate" step="0.01" placeholder="留空使用API汇率" />
+      </div>
+    </div>
+
+    <div class="pep-section">
+      <h4>🚚 运费计算</h4>
+      <div class="pep-shipping-data"></div>
+      <button class="pep-btn-recalculate">🔄 重新计算运费</button>
+    </div>
+
+    <div class="pep-btn-group">
+      <button class="pep-btn-copy">📋 复制全部</button>
+      <button class="pep-btn-clear">🗑️ 清除</button>
+    </div>
+  </div>
+  
+  <div class="pep-message"></div>
+</div>

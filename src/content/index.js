@@ -1,14 +1,24 @@
 import { DataExtractor } from './extractors/DataExtractor.js';
 import { DOMObserver } from './utils/DOMObserver.js';
+import { FloatingPanel } from './ui/FloatingPanel.js';
 
 // 初始化数据提取器
 const extractor = new DataExtractor();
 
+// 初始化浮动面板
+const floatingPanel = new FloatingPanel(extractor);
+
 // 缓存最近一次提取的数据
 let lastExtractedData = null;
 
-// 监听来自popup的消息
+// 监听来自popup和background的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'togglePanel') {
+    floatingPanel.toggle();
+    sendResponse({ success: true });
+    return true;
+  }
+
   if (request.action === 'extractData') {
     // 异步处理
     extractor.extract().then((data) => {
