@@ -289,7 +289,13 @@ export class FloatingPanel {
     const labelFee = parseFloat(this.panel.querySelector('.pep-label-fee').value) || 3;
     const miscRate = (parseFloat(this.panel.querySelector('.pep-misc-rate').value) || 3.9) / 100;
 
-    // 获取初始运费
+    // 获取用户输入的自定义重量，如果没有则使用原始重量
+    const customWeight = this.panel.querySelector('.pep-custom-weight').value;
+    const weightG = customWeight 
+      ? parseFloat(customWeight) 
+      : this.extractWeightInGrams(this.currentData.weight);
+
+    // 获取初始运费（用绿标价格计算的运费）
     const initialShippingFee = this.currentData.shipping?.success
       ? parseFloat(this.currentData.shipping.shippingFee)
       : null;
@@ -300,9 +306,8 @@ export class FloatingPanel {
     // 获取汇率
     const exchangeRate = this.currentData.price?.exchangeRate;
 
-    // 获取尺寸和重量（用于重新计算运费）
+    // 获取尺寸（用于重新计算运费）
     const dimensions = this.extractDimensionsInCm(this.currentData.dimensions);
-    const weightG = this.extractWeightInGrams(this.currentData.weight);
 
     const result = this.profitCalculator.calculate({
       purchaseCost,
