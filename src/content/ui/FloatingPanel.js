@@ -287,8 +287,8 @@ export class FloatingPanel {
     const labelFee = parseFloat(this.panel.querySelector('.pep-label-fee').value) || 3;
     const miscRate = (parseFloat(this.panel.querySelector('.pep-misc-rate').value) || 3.9) / 100;
 
-    // 获取运费
-    const shippingFee = this.currentData.shipping?.success
+    // 获取初始运费
+    const initialShippingFee = this.currentData.shipping?.success
       ? parseFloat(this.currentData.shipping.shippingFee)
       : null;
 
@@ -298,16 +298,58 @@ export class FloatingPanel {
     // 获取汇率
     const exchangeRate = this.currentData.price?.exchangeRate;
 
+    // 获取尺寸和重量（用于重新计算运费）
+    const dimensions = this.extractDimensionsInCm(this.currentData.dimensions);
+    const weightG = this.extractWeightInGrams(this.currentData.weight);
+
     const result = this.profitCalculator.calculate({
       purchaseCost,
-      shippingFee,
+      initialShippingFee,
       commissions,
       exchangeRate,
+      dimensions,
+      weightG,
       labelFee,
       miscRate,
     });
 
     this.renderProfitResult(result);
+  }
+
+  /**
+   * 提取尺寸（转换为厘米）
+   */
+  extractDimensionsInCm(dimensions) {
+    if (!dimensions) return null;
+    if (typeof dimensions === 'object' && dimensions.length && dimensions.width && dimensions.height) {
+      let length = parseFloat(dimensions.length);
+      let width = parseFloat(dimensions.width);
+      let height = parseFloat(dimensions.height);
+      const unit = (dimensions.unit || 'cm').toLowerCase();
+      if (unit === 'mm' || unit === 'мм') {
+        length = length / 10;
+        width = width / 10;
+        height = height / 10;
+      }
+      return { length, width, height };
+    }
+    return null;
+  }
+
+  /**
+   * 提取重量（转换为克）
+   */
+  extractWeightInGrams(weight) {
+    if (!weight) return null;
+    if (typeof weight === 'object' && weight.value) {
+      const value = parseFloat(weight.value);
+      const unit = (weight.unit || 'g').toLowerCase();
+      if (unit === 'kg' || unit === 'кг' || unit === '千克') {
+        return value * 1000;
+      }
+      return value;
+    }
+    return null;
   }
 
   renderProfitResult(result) {
@@ -324,6 +366,14 @@ export class FloatingPanel {
       return;
     }
 
+    // 运费变化提示
+    const shippingChangeHtml = result.shippingChanged ? `
+      <div class="pep-data-item" style="background: #fff3e0; border-left: 3px solid #ff9800;">
+        <span>⚠️ 运费已调整</span>
+        <span>${result.initialShippingFee} → ${result.shippingFee} ¥</span>
+      </div>
+    ` : '';
+
     container.style.display = 'block';
     container.innerHTML = `
       <div class="pep-target-price">
@@ -331,6 +381,8 @@ export class FloatingPanel {
         <div class="pep-target-price-value">${result.targetPriceCNY} ¥</div>
         <div class="pep-target-price-rub">${result.targetPriceRUB} ₽</div>
       </div>
+      
+      ${shippingChangeHtml}
       
       <div class="pep-profit-info">
         <div class="pep-profit-info-item">

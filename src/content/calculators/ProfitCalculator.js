@@ -1,3 +1,5 @@
+import { ShippingCalculator } from './ShippingCalculator.js';
+
 /**
  * 利润计算器
  * 
@@ -11,28 +13,34 @@
  */
 export class ProfitCalculator {
   constructor() {
+    this.shippingCalculator = new ShippingCalculator();
     this.DEFAULT_LABEL_FEE = 3; // 贴单费默认3元
     this.DEFAULT_MISC_RATE = 0.039; // 杂费默认3.9%
     this.DEFAULT_PROFIT_RATE = 0.30; // 默认利润率30%
     this.HIGH_SHIPPING_PROFIT_RATE = 0.50; // 运费>成本时利润率50%
+    this.MAX_ITERATIONS = 10; // 最大迭代次数
   }
 
   /**
-   * 计算目标售价
+   * 计算目标售价（迭代计算直到运费稳定）
    * @param {Object} params 计算参数
    * @param {number} params.purchaseCost 采购成本（元）
-   * @param {number} params.shippingFee 国际运费（元）
+   * @param {number} params.initialShippingFee 初始运费（元）- 用绿标价格计算的
    * @param {number[]} params.commissions 佣金比例数组 [12%, 14%, 15%]
    * @param {number} params.exchangeRate 汇率 (1 CNY = ? RUB)
+   * @param {Object} params.dimensions 尺寸信息
+   * @param {number} params.weightG 重量（克）
    * @param {number} [params.labelFee] 贴单费（元），默认3
    * @param {number} [params.miscRate] 杂费比例，默认0.039
    * @returns {Object} 计算结果
    */
   calculate({
     purchaseCost,
-    shippingFee,
+    initialShippingFee,
     commissions,
     exchangeRate,
+    dimensions,
+    weightG,
     labelFee = this.DEFAULT_LABEL_FEE,
     miscRate = this.DEFAULT_MISC_RATE,
   }) {
@@ -44,6 +52,9 @@ export class ProfitCalculator {
       profitRate: null,
       commissionTier: null,
       commissionRate: null,
+      shippingFee: null,
+      shippingChanged: false,
+      iterations: 0,
       breakdown: {},
       error: null,
     };
@@ -53,7 +64,7 @@ export class ProfitCalculator {
       result.error = '请输入有效的采购成本';
       return result;
     }
-    if (!shippingFee || shippingFee < 0) {
+    if (initialShippingFee === null || initialShippingFee === undefined) {
       result.error = '缺少运费数据';
       return result;
     }
@@ -66,31 +77,77 @@ export class ProfitCalculator {
       return result;
     }
 
-    // 确定目标利润率
-    const targetProfitRate = shippingFee > purchaseCost 
-      ? this.HIGH_SHIPPING_PROFIT_RATE 
-      : this.DEFAULT_PROFIT_RATE;
-
     // 解析佣金比例
     const commissionRates = commissions.map(c => this.parseCommissionRate(c));
 
-    // 计算目标售价（需要迭代，因为佣金挡位取决于售价）
-    const targetPrice = this.findTargetPrice({
+    // 迭代计算
+    let currentShippingFee = initialShippingFee;
+    let targetPrice = null;
+    let iterations = 0;
+
+    for (let i = 0; i < this.MAX_ITERATIONS; i++) {
+      iterations++;
+
+      // 确定目标利润率
+      const targetProfitRate = currentShippingFee > purchaseCost 
+        ? this.HIGH_SHIPPING_PROFIT_RATE 
+        : this.DEFAULT_PROFIT_RATE;
+
+      // 计算目标售价
+      targetPrice = this.findTargetPrice({
+        purchaseCost,
+        shippingFee: currentShippingFee,
+        labelFee,
+        miscRate,
+        targetProfitRate,
+        commissionRates,
+        exchangeRate,
+      });
+
+      if (!targetPrice) {
+        result.error = '无法计算出合理的售价';
+        return result;
+      }
+
+      // 用新售价重新计算运费
+      const newPriceRUB = targetPrice * exchangeRate;
+      const newShippingResult = this.shippingCalculator.calculate({
+        priceRUB: newPriceRUB,
+        weightG,
+        dimensions,
+      });
+
+      if (!newShippingResult.success) {
+        // 如果新售价导致运费计算失败（比如超出范围），使用原运费
+        break;
+      }
+
+      const newShippingFee = parseFloat(newShippingResult.shippingFee);
+
+      // 检查运费是否稳定（差异小于0.01元）
+      if (Math.abs(newShippingFee - currentShippingFee) < 0.01) {
+        currentShippingFee = newShippingFee;
+        break;
+      }
+
+      currentShippingFee = newShippingFee;
+    }
+
+    // 最终计算
+    const finalProfitRate = currentShippingFee > purchaseCost 
+      ? this.HIGH_SHIPPING_PROFIT_RATE 
+      : this.DEFAULT_PROFIT_RATE;
+
+    targetPrice = this.findTargetPrice({
       purchaseCost,
-      shippingFee,
+      shippingFee: currentShippingFee,
       labelFee,
       miscRate,
-      targetProfitRate,
+      targetProfitRate: finalProfitRate,
       commissionRates,
       exchangeRate,
     });
 
-    if (!targetPrice) {
-      result.error = '无法计算出合理的售价';
-      return result;
-    }
-
-    // 确定最终使用的佣金挡位
     const priceRUB = targetPrice * exchangeRate;
     const tier = this.getCommissionTier(priceRUB);
     const commissionRate = commissionRates[tier];
@@ -98,7 +155,7 @@ export class ProfitCalculator {
     // 计算各项费用
     const commission = targetPrice * commissionRate;
     const miscFee = targetPrice * miscRate;
-    const totalCost = purchaseCost + shippingFee + labelFee + commission + miscFee;
+    const totalCost = purchaseCost + currentShippingFee + labelFee + commission + miscFee;
     const profit = targetPrice - totalCost;
 
     result.success = true;
@@ -108,21 +165,25 @@ export class ProfitCalculator {
     result.profitRate = ((profit / purchaseCost) * 100).toFixed(1) + '%';
     result.commissionTier = tier + 1;
     result.commissionRate = (commissionRate * 100).toFixed(0) + '%';
+    result.shippingFee = currentShippingFee.toFixed(2);
+    result.shippingChanged = Math.abs(currentShippingFee - initialShippingFee) >= 0.01;
+    result.initialShippingFee = initialShippingFee.toFixed(2);
+    result.iterations = iterations;
     result.breakdown = {
       purchaseCost: purchaseCost.toFixed(2),
-      shippingFee: shippingFee.toFixed(2),
+      shippingFee: currentShippingFee.toFixed(2),
       labelFee: labelFee.toFixed(2),
       commission: commission.toFixed(2),
       miscFee: miscFee.toFixed(2),
       totalCost: totalCost.toFixed(2),
-      targetProfitRate: (targetProfitRate * 100).toFixed(0) + '%',
+      targetProfitRate: (finalProfitRate * 100).toFixed(0) + '%',
     };
 
     return result;
   }
 
   /**
-   * 迭代计算目标售价
+   * 计算目标售价
    */
   findTargetPrice({ purchaseCost, shippingFee, labelFee, miscRate, targetProfitRate, commissionRates, exchangeRate }) {
     // 目标利润
