@@ -7,9 +7,12 @@ const extractor = new DataExtractor();
 // 监听来自popup的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'extractData') {
-    const data = extractor.extract();
-    console.log('提取结果:', data);
-    sendResponse(data);
+    // 异步处理
+    extractor.extract().then((data) => {
+      console.log('提取结果:', data);
+      sendResponse(data);
+    });
+    return true; // 保持消息通道开放
   }
   return true;
 });

@@ -1,3 +1,5 @@
+import { ExchangeRateService } from '../services/ExchangeRateService.js';
+
 /**
  * 价格提取器 - 提取绿标价格和灰标价格
  */
@@ -7,13 +9,58 @@ export class PriceExtractor {
     this.greenPriceSelector = 'span.tsHeadline600Large';
     // 灰标价格选择器 (普通价格)
     this.grayPriceSelector = 'span.pdp_bg4.tsHeadline500Medium';
+    this.exchangeRateService = new ExchangeRateService();
   }
 
-  extract() {
+  /**
+   * 提取价格（异步，包含汇率转换）
+   */
+  async extract() {
+    const greenPriceCNY = this.extractGreenPrice();
+    const grayPriceCNY = this.extractGrayPrice();
+    
+    // 获取汇率
+    const rate = await this.exchangeRateService.getRate();
+    
+    return {
+      greenPrice: greenPriceCNY,
+      grayPrice: grayPriceCNY,
+      greenPriceRUB: this.convertToRUB(greenPriceCNY, rate),
+      grayPriceRUB: this.convertToRUB(grayPriceCNY, rate),
+      exchangeRate: rate,
+    };
+  }
+
+  /**
+   * 同步提取价格（不含汇率转换）
+   */
+  extractSync() {
     return {
       greenPrice: this.extractGreenPrice(),
       grayPrice: this.extractGrayPrice(),
     };
+  }
+
+  /**
+   * 转换为卢布
+   */
+  convertToRUB(priceStr, rate) {
+    if (!priceStr || !rate) return null;
+    const numValue = this.extractNumber(priceStr);
+    if (numValue === null) return null;
+    const rubValue = numValue * rate;
+    return rubValue.toFixed(2) + ' ₽';
+  }
+
+  /**
+   * 从价格字符串提取数值
+   */
+  extractNumber(priceStr) {
+    if (!priceStr) return null;
+    // 移除货币符号和空格，将逗号替换为点
+    const cleaned = priceStr.replace(/[¥₽\s]/g, '').replace(',', '.');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? null : num;
   }
 
   /**

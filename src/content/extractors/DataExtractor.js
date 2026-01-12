@@ -13,7 +13,7 @@ export class DataExtractor {
     this.strategy = new ExtractionStrategy();
   }
 
-  extract() {
+  async extract() {
     const result = {
       success: false,
       dimensions: null,
@@ -30,7 +30,7 @@ export class DataExtractor {
       result.dimensions = this.strategy.extractDimensions(this.dimensionExtractor);
       result.weight = this.strategy.extractWeight(this.weightExtractor);
       result.commission = this.commissionExtractor.extract();
-      result.price = this.priceExtractor.extract();
+      result.price = await this.priceExtractor.extract();
 
       // 提取其他数据
       result.allData = this.extractAdditionalData();
