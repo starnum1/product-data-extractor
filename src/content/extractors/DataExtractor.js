@@ -204,9 +204,9 @@ export class DataExtractor {
   /**
    * 使用自定义值重新计算运费
    * @param {Object} originalData 原始提取数据
-   * @param {Object} customValues 自定义值 {customWeight, customRate}
+   * @param {Object} customValues 自定义值 {customWeight, customRate, customDimensions}
    */
-  async recalculateShipping(originalData, { customWeight, customRate }) {
+  async recalculateShipping(originalData, { customWeight, customRate, customDimensions }) {
     const result = {
       shipping: null,
       price: null,
@@ -229,6 +229,12 @@ export class DataExtractor {
       exchangeRate = originalData.price?.exchangeRate;
     }
 
+    // 使用自定义尺寸或原始尺寸
+    let dimensions = customDimensions;
+    if (!dimensions) {
+      dimensions = this.extractDimensionsInCm(originalData.dimensions);
+    }
+
     // 如果使用了自定义汇率，重新计算卢布价格
     let priceRUB;
     if (customRate && originalData.price?.greenPrice) {
@@ -247,9 +253,6 @@ export class DataExtractor {
     } else {
       priceRUB = this.extractPriceNumber(originalData.price?.greenPriceRUB);
     }
-
-    // 获取尺寸
-    const dimensions = this.extractDimensionsInCm(originalData.dimensions);
 
     if (!priceRUB || !weightG || !dimensions) {
       result.shipping = {

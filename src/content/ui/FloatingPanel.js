@@ -148,8 +148,12 @@ export class FloatingPanel {
         <div class="pep-data-item"><span>高度</span><span>${height} ${unit}</span></div>
         <div class="pep-data-item"><span>完整</span><span>${raw}</span></div>
       `;
+      // 设置占位符
+      this.panel.querySelector('.pep-custom-length').placeholder = `默认: ${length}`;
+      this.panel.querySelector('.pep-custom-width').placeholder = `默认: ${width}`;
+      this.panel.querySelector('.pep-custom-height').placeholder = `默认: ${height}`;
     } else {
-      dimContainer.innerHTML = '<div class="pep-data-item"><span>未找到尺寸数据</span></div>';
+      dimContainer.innerHTML = '<div class="pep-data-item"><span>⚠️ 未找到尺寸数据，请手动输入</span></div>';
     }
 
     // 重量
@@ -222,11 +226,25 @@ export class FloatingPanel {
 
     const customWeight = this.panel.querySelector('.pep-custom-weight').value;
     const customRate = this.panel.querySelector('.pep-custom-rate').value;
+    const customLength = this.panel.querySelector('.pep-custom-length').value;
+    const customWidth = this.panel.querySelector('.pep-custom-width').value;
+    const customHeight = this.panel.querySelector('.pep-custom-height').value;
+
+    // 构建自定义尺寸对象
+    let customDimensions = null;
+    if (customLength && customWidth && customHeight) {
+      customDimensions = {
+        length: parseFloat(customLength),
+        width: parseFloat(customWidth),
+        height: parseFloat(customHeight),
+      };
+    }
 
     try {
       const result = await this.extractor.recalculateShipping(this.currentData, {
         customWeight: customWeight ? parseFloat(customWeight) : null,
         customRate: customRate ? parseFloat(customRate) : null,
+        customDimensions: customDimensions,
       });
 
       if (result.shipping) {
@@ -274,6 +292,9 @@ export class FloatingPanel {
     this.panel.querySelector('.pep-empty-state').style.display = 'block';
     this.panel.querySelector('.pep-custom-weight').value = '';
     this.panel.querySelector('.pep-custom-rate').value = '';
+    this.panel.querySelector('.pep-custom-length').value = '';
+    this.panel.querySelector('.pep-custom-width').value = '';
+    this.panel.querySelector('.pep-custom-height').value = '';
     this.panel.querySelector('.pep-purchase-cost').value = '';
     this.panel.querySelector('.pep-profit-result').style.display = 'none';
     this.showMessage('', '');
@@ -295,6 +316,30 @@ export class FloatingPanel {
       ? parseFloat(customWeight) 
       : this.extractWeightInGrams(this.currentData.weight);
 
+    // 获取用户输入的自定义尺寸，如果没有则使用原始尺寸
+    const customLength = this.panel.querySelector('.pep-custom-length').value;
+    const customWidth = this.panel.querySelector('.pep-custom-width').value;
+    const customHeight = this.panel.querySelector('.pep-custom-height').value;
+    
+    let dimensions;
+    if (customLength && customWidth && customHeight) {
+      // 使用自定义尺寸
+      dimensions = {
+        length: parseFloat(customLength),
+        width: parseFloat(customWidth),
+        height: parseFloat(customHeight),
+      };
+    } else {
+      // 使用原始尺寸
+      dimensions = this.extractDimensionsInCm(this.currentData.dimensions);
+    }
+
+    // 验证尺寸
+    if (!dimensions) {
+      this.showMessage('请输入尺寸信息（长、宽、高）', 'error');
+      return;
+    }
+
     // 获取初始运费（用绿标价格计算的运费）
     const initialShippingFee = this.currentData.shipping?.success
       ? parseFloat(this.currentData.shipping.shippingFee)
@@ -305,9 +350,6 @@ export class FloatingPanel {
 
     // 获取汇率
     const exchangeRate = this.currentData.price?.exchangeRate;
-
-    // 获取尺寸（用于重新计算运费）
-    const dimensions = this.extractDimensionsInCm(this.currentData.dimensions);
 
     const result = this.profitCalculator.calculate({
       purchaseCost,
