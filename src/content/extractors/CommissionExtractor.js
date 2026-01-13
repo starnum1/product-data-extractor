@@ -73,9 +73,9 @@ export class CommissionExtractor {
         }
       }
 
-      // 去重
+      // 不去重，保留所有佣金（即使有重复）
+      // 因为佣金对应3个挡位，必须保持3个值
       if (result.commissions.length > 0) {
-        result.commissions = [...new Set(result.commissions)];
         result.raw = result.commissions.join(', ');
       }
 
