@@ -25,6 +25,20 @@ export class FloatingPanel {
     }
   }
 
+  show() {
+    if (!this.panel) {
+      this.create();
+    } else {
+      this.panel.style.display = 'block';
+    }
+  }
+
+  hide() {
+    if (this.panel) {
+      this.panel.style.display = 'none';
+    }
+  }
+
   create() {
     // 注入样式
     this.injectStyles();
