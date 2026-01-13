@@ -32,6 +32,7 @@ export class ProfitCalculator {
    * @param {number} params.weightG 重量（克）
    * @param {number} [params.labelFee] 贴单费（元），默认3
    * @param {number} [params.miscRate] 杂费比例，默认0.039
+   * @param {number} [params.customProfitRate] 自定义利润率（0-1之间），如果提供则使用此值
    * @returns {Object} 计算结果
    */
   calculate({
@@ -43,6 +44,7 @@ export class ProfitCalculator {
     weightG,
     labelFee = this.DEFAULT_LABEL_FEE,
     miscRate = this.DEFAULT_MISC_RATE,
+    customProfitRate = null,
   }) {
     const result = {
       success: false,
@@ -89,9 +91,16 @@ export class ProfitCalculator {
       iterations++;
 
       // 确定目标利润率
-      const targetProfitRate = currentShippingFee > purchaseCost 
-        ? this.HIGH_SHIPPING_PROFIT_RATE 
-        : this.DEFAULT_PROFIT_RATE;
+      let targetProfitRate;
+      if (customProfitRate !== null && customProfitRate !== undefined) {
+        // 使用用户自定义利润率
+        targetProfitRate = customProfitRate;
+      } else {
+        // 使用自动计算的利润率
+        targetProfitRate = currentShippingFee > purchaseCost 
+          ? this.HIGH_SHIPPING_PROFIT_RATE 
+          : this.DEFAULT_PROFIT_RATE;
+      }
 
       // 计算目标售价
       targetPrice = this.findTargetPrice({
@@ -134,9 +143,16 @@ export class ProfitCalculator {
     }
 
     // 最终计算
-    const finalProfitRate = currentShippingFee > purchaseCost 
-      ? this.HIGH_SHIPPING_PROFIT_RATE 
-      : this.DEFAULT_PROFIT_RATE;
+    let finalProfitRate;
+    if (customProfitRate !== null && customProfitRate !== undefined) {
+      // 使用用户自定义利润率
+      finalProfitRate = customProfitRate;
+    } else {
+      // 使用自动计算的利润率
+      finalProfitRate = currentShippingFee > purchaseCost 
+        ? this.HIGH_SHIPPING_PROFIT_RATE 
+        : this.DEFAULT_PROFIT_RATE;
+    }
 
     targetPrice = this.findTargetPrice({
       purchaseCost,

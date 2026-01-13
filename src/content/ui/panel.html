@@ -70,6 +70,11 @@
         <input type="number" class="pep-purchase-cost" placeholder="请输入采购成本" step="0.01" />
       </div>
       <div class="pep-input-group">
+        <label>目标利润率 (%)</label>
+        <input type="number" class="pep-target-profit-rate" placeholder="留空使用自动计算" step="1" />
+        <small style="color: #888; font-size: 11px;">默认：运费≤成本时30%，运费>成本时50%</small>
+      </div>
+      <div class="pep-input-group">
         <label>贴单费 (元)</label>
         <input type="number" class="pep-label-fee" placeholder="默认: 3" value="3" step="0.1" />
       </div>

@@ -296,6 +296,7 @@ export class FloatingPanel {
     this.panel.querySelector('.pep-custom-width').value = '';
     this.panel.querySelector('.pep-custom-height').value = '';
     this.panel.querySelector('.pep-purchase-cost').value = '';
+    this.panel.querySelector('.pep-target-profit-rate').value = '';
     this.panel.querySelector('.pep-profit-result').style.display = 'none';
     this.showMessage('', '');
   }
@@ -309,6 +310,12 @@ export class FloatingPanel {
     const purchaseCost = parseFloat(this.panel.querySelector('.pep-purchase-cost').value);
     const labelFee = parseFloat(this.panel.querySelector('.pep-label-fee').value) || 3;
     const miscRate = (parseFloat(this.panel.querySelector('.pep-misc-rate').value) || 3.9) / 100;
+
+    // 获取用户输入的目标利润率
+    const targetProfitRateInput = this.panel.querySelector('.pep-target-profit-rate').value;
+    const customProfitRate = targetProfitRateInput 
+      ? parseFloat(targetProfitRateInput) / 100 
+      : null;
 
     // 获取用户输入的自定义重量，如果没有则使用原始重量
     const customWeight = this.panel.querySelector('.pep-custom-weight').value;
@@ -360,6 +367,7 @@ export class FloatingPanel {
       weightG,
       labelFee,
       miscRate,
+      customProfitRate,
     });
 
     this.renderProfitResult(result);
