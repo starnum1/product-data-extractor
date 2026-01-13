@@ -1,4 +1,9 @@
 export class CommissionExtractor {
+  constructor() {
+    // 默认佣金比例
+    this.DEFAULT_COMMISSIONS = ['12%', '14%', '15%'];
+  }
+
   extract() {
     const result = {
       commissions: [],
@@ -83,6 +88,12 @@ export class CommissionExtractor {
       console.error('佣金提取错误:', error);
     }
 
-    return result.commissions.length > 0 ? result : null;
+    // 如果没有提取到佣金，使用默认值
+    if (result.commissions.length === 0) {
+      result.commissions = this.DEFAULT_COMMISSIONS;
+      result.raw = result.commissions.join(', ') + ' (默认)';
+    }
+
+    return result;
   }
 }
